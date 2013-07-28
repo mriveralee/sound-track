@@ -2,9 +2,10 @@
  * Constants
  */
 
+var YOUTUBE_COUNT = 50;
 var YOUTUBE_API_KEY = 'AIzaSyBWoA1ZTbfptkRREoNpA9ryhlnQPrWbiqQ';
 var YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3/search?part=snippet&q=';
-var YOUTUBE_SEARCH_SUFFIX = '&type=video&videoCaption=closedCaption&key=';
+var YOUTUBE_SEARCH_SUFFIX = '&maxResults='+ YOUTUBE_COUNT + '&type=video&videoCaption=closedCaption&key=';
 
 var CONCERTS_APP_ID = 'SOUND_TRACKR';
 var CONCERTS_BASE_URL = 'http://api.bandsintown.com/artists/';
@@ -136,8 +137,9 @@ app.get('/home', function(req, res) {
  *
  */
 app.get('/search', function(req, res) {
-  if (!req.query || !req.query.artist) {
-    sendError(res, 'No Artist given')
+  if (!req.query || !req.query.artist || req.query.artist == '') {
+    sendError(res, 'No Artist given');
+    return;
   }
   var results;
   var artist = toTitleCase(req.query.artist);
@@ -194,17 +196,20 @@ function getYoutubeVideos(artist, callback) {
       callback(error, body);
       return;
     }
+    body = JSON.parse(body);
+    var results = [];
     if (body) {
-      body = JSON.parse(body);
-      console.log(body);
+      for (var i = 0; i < body.items.length; i++) {
+        var item = body.items[i];
+        var filteredItem = getFilteredYoutubeVideo(item);
+        results.push(filteredItem);
+        console.log(filteredItem);
+      }
       // Cache results if there are some with no err
-      YOUTUBE[artist] = body;
-      console.log(getYoutubeEmbedString(body.items[0].id.videoId));
-
+      YOUTUBE[artist] = results;
     }
-
-    // TODO: Handle failed wiki request
-    callback(null, body);
+    // TODO: Handle failed youtube request
+    callback(null, results);
   });
 }
 
@@ -224,25 +229,36 @@ function getTweets(artist, callback) {
 
   var params = "?screen_name="+twitter_id+"&count="+TWEET_COUNT+"&exclude_replies=true&include_rts=false";
   twitter.get("statuses/user_timeline/", params, function(error, data) {
+          var results = [];
+    if (error) {
+      console.log(error);
+      callback(null, error);
+      return;
+    }
     if (data) {
       // Cache results if there are some with no err
       data = JSON.parse(data);
-      TWEETS[artist] = data;
+      for (var i = 0; i < data.length; i++) {
+        var tweet = data[i];
+        var filteredTweet = getFilteredTweet(tweet);
+        results.push(filteredTweet);
+      }
+      TWEETS[artist] = results;
     }
 
     // TODO: Handle failed twitter request
-    callback(null, data);
+    callback(null, results);
     });
 }
 
 
 // Event to console log twitter data, yo
-twitter.on('get:statuses/user_timeline/', function(error, data){
-  var tweetData = (JSON.parse(data));
-  for (var i in tweetData) {
-    console.log(tweetData[i].text);
-  }
-});
+// twitter.on('get:statuses/user_timeline/', function(error, data){
+//   var tweetData = (JSON.parse(data));
+//   for (var i in tweetData) {
+//     console.log(tweetData[i].text);
+//   }
+// });
 
 
 /**
@@ -332,10 +348,47 @@ function getYoutubeApiUrl(artist) {
 /**
   * Helper function to get an embed tag for a youtube video by video id 
   */
-function getYoutubeEmbedString(videoId, width, height) {
+function getYoutubeEmbedTag(videoId, width, height) {
   width = (width) ? width : 320;
   height = (height) ?height : 240;
   return '<iframe width="' + width + '" height="' + height + '" src="http://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+}
+
+/**
+ * Filters the youtube video data and returns a basic filterd information
+ */
+function getFilteredYoutubeVideo(videoData) {
+  var video = {
+    name: (videoData.snippet && videoData.snippet.title) ? videoData.snippet.title : "Untitled",
+    html: (videoData.id && videoData.id.videoId) ? getYoutubeEmbedTag(videoData.id.videoId) : '',
+    thumbnail: (videoData.snippet && videoData.snippet.thumbnails && videoData.snippet.thumbnails.default) ? videoData.snippet.thumbnails.default.url : ''
+  };
+
+  return video;
+}
+
+/**
+  * Filters a tweet and returns a basic tweet data object
+  */
+function getFilteredTweet(tweetData) {
+  var filteredTweet = {
+    created: tweetData.created_at,
+    text: tweetData.text,
+    twitter_id: tweetData.user.screen_name,
+    tweet_id: tweetData.id_str,
+    url: getTweetUrl(tweetData.id_str, tweetData.user.screen_name),
+    artist: tweetData.user.name,
+    location: tweetData.user.location,
+    profile_img: tweetData.user.profile_background_image_url
+  };
+  return filteredTweet;
+}
+
+/**
+  * Get status update url for a tweet
+  */
+function getTweetUrl(tweetId, twitterId) {
+  return 'http://twitter.com/' + twitterId + '/statuses/' + tweetId.toString();
 }
 
 
