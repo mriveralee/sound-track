@@ -196,7 +196,16 @@ function getYoutubeVideos(artist, callback) {
  */
 function getTweets(artist, callback) {
   // Do get request to get tweets
-  var params = "?screen_name=muse&count="+TWEET_COUNT+"&exclude_replies=true&include_rts=false";
+  var twitter_id = TWITTER_USER_IDS[artist];
+  if (!twitter_id) {
+    doesNotExist = {
+      error: "Could not find tweets for this artist"
+    }
+    callback(doesNotExist);
+    return;
+  }
+
+  var params = "?screen_name="+twitter_id+"&count="+TWEET_COUNT+"&exclude_replies=true&include_rts=false";
   twitter.get("statuses/user_timeline/", params, function(error, data) {
     if (data != null) {
       // Cache results if there are some with no err
