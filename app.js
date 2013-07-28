@@ -274,13 +274,13 @@ function getWiki(artist, callback) {
     }
     if (body) {
       body = JSON.parse(body);
-      console.log(body);
+      results = getFilteredWiki(body);
       // Cache results if there are some with no err
-      WIKI[artist] = body;
+      WIKI[artist] = results;
     }
 
     // TODO: Handle failed wiki request
-    callback(null, body);
+    callback(null, results);
   });
 }
 
@@ -390,6 +390,35 @@ function getFilteredTweet(tweetData) {
 function getTweetUrl(tweetId, twitterId) {
   return 'http://twitter.com/' + twitterId + '/statuses/' + tweetId.toString();
 }
+
+/**
+  * Filters wikipedia data for an artist
+  */
+function getFilteredWiki(wikiData) {
+  var pages = (wikiData && wikiData.query) ? wikiData.query.pages : [];
+  var firstPage = {}; 
+  // Grab first page
+  for (var key in pages) {
+    firstPage = pages[key];
+    break;
+  }
+  // Convert to filtered data
+  var wiki = {
+    title: firstPage.title ? firstPage.title : '',
+    page_id: firstPage.pageid,
+    url: getWikipediaUrl(firstPage.pageid),
+    about: firstPage.extract
+  };
+  return wiki;
+}
+
+/**
+  * Gets a wikipedia article url from wikipedia article id 
+  */ 
+function getWikipediaUrl(pageId) {
+  return 'http://en.wikipedia.org/wiki?curid=' + pageId;
+}
+
 
 
 
