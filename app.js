@@ -1,7 +1,13 @@
+/**
+ * Constants
+ */
+var TWEET_COUNT = 100;
 
 /**
  * Module dependencies.
  */
+
+var util = require("util");
 
 var express = require('express')
   , http = require('http')
@@ -37,6 +43,14 @@ app.configure('development', function(){
 
 });
 
+// Twitter
+ var twitter = require('simple-twitter');
+ twitter = new twitter( 'e8ng8WPJrnXGOPIZQ02Cg', //consumer key from twitter api
+                        'rTpWpwYvYJSeimJXHclDVhAsvMRXTsugtGWLTkSN8U', //consumer secret key from twitter api
+                        '287883883-p9YnvTpVYKlbNuBmXiNrjnr5IlPvqvkd4pfsiUm3', //acces token from twitter api
+                         '4f76p8gLmbJnTwa1hIovWwEQ4xueRv84kOtMQ3PiqEQ', //acces token secret from twitter api
+                        false//3600  //(optional) time in seconds in which file should be cached (only for get requests), put false for no caching
+                        );
 
 //Run the Server
 var server = http.createServer(app);
@@ -86,8 +100,14 @@ app.get('/coolRoute', function(req, res) {
   res.send("HELLO!");
 });
 
+twitter.on('get:statuses/user_timeline/', function(error, data){
+  var tweetData = (JSON.parse(data));
+  for (var i in tweetData) {
+    console.log(tweetData[i].text);
+  }
+});
 
-
-
+var params = "?screen_name=muse&count="+TWEET_COUNT+"&exclude_replies=true&include_rts=false";
+twitter.get("statuses/user_timeline/", params);
 
 
