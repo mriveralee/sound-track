@@ -24,7 +24,7 @@ var SearchBarView = Backbone.View.extend({
 	template: function() {
 		var temp =
 			"<input class='search-input' type='text' placeholder='Search for an artist'>" +
-			"<input class='search-button' type='submit' value='Track'>"
+			"<button class='search-button' type='submit'>Track</button>"
 			;
 		return temp;
 	},
