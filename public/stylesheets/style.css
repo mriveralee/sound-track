@@ -38,7 +38,7 @@ a {
 }
 
 .search-input {
-	width: 375px;
+	width: 77%;
 	height: 38px;
 	font-size: 29px;
 	padding: 1px 9px;
@@ -47,7 +47,7 @@ a {
 }
 
 .search-button {
-	width: 75px;
+	width: 15%;
 	height: 43px;
 	font-size: 20px;
 	vertical-align: middle;
