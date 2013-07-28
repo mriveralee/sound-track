@@ -69,7 +69,7 @@ var SearchBarView = Backbone.View.extend({
 
 	events: {
 		"click .search-button": "updateModel",
-		"keyup": "andleKeypress"
+		"keyup": "handleKeypress"
 	},
 
 	initialize: function() {
