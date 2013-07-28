@@ -305,14 +305,20 @@ function getConcerts(artist, callback) {
       callback(error, body);
       return;
     }
+
+    var results = [];
     if (body) {
       body = JSON.parse(body);
-      console.log(body);
+      for (var i = 0; i < body.length; i++) {
+        var item = body[i];
+        var filteredConcert = getFilteredConcert(item);
+        results.push(filteredConcert);
+      }
       // Cache results if there are some with no err
-      CONCERTS[artist] = body;
+      CONCERTS[artist] = results;
     }
     // TODO: Handle failed concerts request
-    callback(null, body);
+    callback(null, results);
   });
 }
 
@@ -417,6 +423,23 @@ function getFilteredWiki(wikiData) {
   */ 
 function getWikipediaUrl(pageId) {
   return 'http://en.wikipedia.org/wiki?curid=' + pageId;
+}
+
+/**
+  * Filters concert data for an artist
+  */
+function getFilteredConcert(concertData) {
+
+  var concert = {
+    ticket_status: concertData.ticket_status,
+    title: concertData.title,
+    description: concertData.description,
+    date: concertData.formatted_datetime,
+    location: concertData.formatted_location,
+    ticket_url: concertData.ticket_url,
+    fb_rsvp_url: concertData.facebook_rsvp_url
+  };
+  return concert;
 }
 
 
