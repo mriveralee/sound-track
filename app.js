@@ -23,14 +23,13 @@ var WIKI = {};
 var TWEET_COUNT = 100;
 
 // Twitter user ids
-var a = require('./twitter-handles');
-var TWITTER_USER_IDS = a.TWITTER_USER_IDS;
+var TWITTER_USER_IDS = require('./twitter-handles').TWITTER_USER_IDS;
 
 var OTHER_TWITTER_USERS_IDS = {
  'muse': '14583400',
  'ed sheeran': '85452649',
  'coldplay': '18863815'
-}
+};
 
 
 /**
@@ -200,6 +199,8 @@ function getYoutubeVideos(artist, callback) {
       console.log(body);
       // Cache results if there are some with no err
       YOUTUBE[artist] = body;
+      console.log(getYoutubeEmbedString(body.items[0].id.videoId));
+
     }
 
     // TODO: Handle failed wiki request
@@ -212,12 +213,12 @@ function getYoutubeVideos(artist, callback) {
  */
 function getTweets(artist, callback) {
   // Do get request to get tweets
-  var twitter_id = TWITTER_USER_IDS[artist];
+  var twitter_id = TWITTER_USER_IDS[artist.toLowerCase()];
   if (!twitter_id) {
-    doesNotExist = {
+    var doesNotExist = {
       error: "Could not find tweets for this artist"
     }
-    callback(doesNotExist);
+    callback(null, doesNotExist);
     return;
   }
 
@@ -316,17 +317,17 @@ function sendError(res, errorStr) {
 /**
  * Returns a title case version of an input string
  */
- function toTitleCase(str) {
-    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+function toTitleCase(str) {
+  return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 } 
 
 
 /**
   * Gets a youtube url for an artist
   */
-  function getYoutubeApiUrl(artist) {
-    return YOUTUBE_BASE_URL + artist + YOUTUBE_SEARCH_SUFFIX + YOUTUBE_API_KEY;
-  }
+function getYoutubeApiUrl(artist) {
+  return YOUTUBE_BASE_URL + artist + YOUTUBE_SEARCH_SUFFIX + YOUTUBE_API_KEY;
+}
 
 /**
   * Helper function to get an embed tag for a youtube video by video id 
@@ -334,8 +335,9 @@ function sendError(res, errorStr) {
 function getYoutubeEmbedString(videoId, width, height) {
   width = (width) ? width : 320;
   height = (height) ?height : 240;
-  return '<iframe width="' + width + '" height="' + height + ' src="//www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+  return '<iframe width="' + width + '" height="' + height + '" src="http://www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
 }
+
 
 
 

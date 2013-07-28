@@ -1,4 +1,6 @@
 exports.TWITTER_USER_IDS = {
+	"ed sheeran": "edsheeran",
+	"muse": "muse",
  	"justin bieber": "justinbieber",
 	"lady gaga": "ladygaga",
 	"katy perry": "katyperry",
