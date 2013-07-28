@@ -2,10 +2,16 @@
  * Constants
  */
 
-var CONCERTS_APP_ID = 'SOUND_TRACKR';
-var CONCERTS_BASE_URL = "http://api.bandsintown.com/artists/";
-var CONCERTS_EVENTS_SUFFIX = "/events.json?api_version=2.0&app_id=";
+var YOUTUBE_API_KEY = 'AIzaSyBWoA1ZTbfptkRREoNpA9ryhlnQPrWbiqQ';
+var YOUTUBE_BASE_URL = 'https://www.googleapis.com/youtube/v3/search?part=snippet&q=';
+var YOUTUBE_SEARCH_SUFFIX = '&type=video&videoCaption=closedCaption&key=';
 
+var CONCERTS_APP_ID = 'SOUND_TRACKR';
+var CONCERTS_BASE_URL = 'http://api.bandsintown.com/artists/';
+var CONCERTS_EVENTS_SUFFIX = '/events.json?api_version=2.0&app_id=';
+
+var WIKI_BASE_URL = 'http://en.wikipedia.org/w/api.php?format=json&action=query&prop=extracts&titles=';
+var WIKI_EXTRACTS_SUFFIX = '&exintro=1'
 
 // DAT DATA because we don't need 
 var YOUTUBE = {};
@@ -135,7 +141,7 @@ app.get('/search', function(req, res) {
     sendError(res, 'No Artist given')
   }
   var results;
-  var artist = req.query.artist;
+  var artist = toTitleCase(req.query.artist);
 
   var hasCache = YOUTUBE[artist] && CONCERTS[artist] && WIKI[artist] && TWEETS[artist];
   if (hasCache) {
@@ -182,13 +188,23 @@ app.get('/search', function(req, res) {
   * Does a get request to get youtube videos for an artist
   */
 function getYoutubeVideos(artist, callback) {
-  // DO Request.get to get youtube videos
-  var results;
-  if (results != null) {
-    // Cache results if there are some with no err
-    YOUTUBE[artist] = results;
-  }
-  callback(null, results);
+  // Do get request to get youtube information
+  var youtubeUrl = getYoutubeApiUrl(artist);
+  request.get(youtubeUrl, function (error, response, body) {
+    if (error) {
+      callback(error, body);
+      return;
+    }
+    if (body) {
+      body = JSON.parse(body);
+      console.log(body);
+      // Cache results if there are some with no err
+      YOUTUBE[artist] = body;
+    }
+
+    // TODO: Handle failed wiki request
+    callback(null, body);
+  });
 }
 
 /**
@@ -207,10 +223,13 @@ function getTweets(artist, callback) {
 
   var params = "?screen_name="+twitter_id+"&count="+TWEET_COUNT+"&exclude_replies=true&include_rts=false";
   twitter.get("statuses/user_timeline/", params, function(error, data) {
-    if (data != null) {
+    if (data) {
       // Cache results if there are some with no err
+      data = JSON.parse(data);
       TWEETS[artist] = data;
     }
+
+    // TODO: Handle failed twitter request
     callback(null, data);
     });
 }
@@ -229,13 +248,31 @@ twitter.on('get:statuses/user_timeline/', function(error, data){
  * Does a get request to get wikipedia data for an artist
  */
 function getWiki(artist, callback) {
-  // DO Request.get to get wiki information
-  var results;
-  if (results != null) {
-    // Cache results if there are some with no err
-    WIKI[artist] = results;
-  }
-  callback(null, results);
+  // Do get request to get wiki information
+  var wikiUrl = getWikiApiUrl(artist);
+  request.get(wikiUrl, function (error, response, body) {
+    if (error) {
+      callback(error, body);
+      return;
+    }
+    if (body) {
+      body = JSON.parse(body);
+      console.log(body);
+      // Cache results if there are some with no err
+      WIKI[artist] = body;
+    }
+
+    // TODO: Handle failed wiki request
+    callback(null, body);
+  });
+}
+
+
+/**
+ * Returns the wiki api URL for an artist
+ */
+function getWikiApiUrl(artist) {
+  return WIKI_BASE_URL + artist + WIKI_EXTRACTS_SUFFIX;
 }
 
 
@@ -245,17 +282,19 @@ function getWiki(artist, callback) {
  */
 function getConcerts(artist, callback) {
   // DO Request.get to get concerts information
-  var concertsURL = getConcertsApiUrl(artist);
-  request.get(concertsURL, function (error, response, body) {
+  var concertsUrl = getConcertsApiUrl(artist);
+  request.get(concertsUrl, function (error, response, body) {
     if (error) {
       callback(error, body);
       return;
     }
     if (body) {
+      body = JSON.parse(body);
       console.log(body);
       // Cache results if there are some with no err
       CONCERTS[artist] = body;
     }
+    // TODO: Handle failed concerts request
     callback(null, body);
   });
 }
@@ -273,6 +312,31 @@ function getConcertsApiUrl(artist) {
 function sendError(res, errorStr) {
   res.send(500, { error: errorStr });
 }
+
+/**
+ * Returns a title case version of an input string
+ */
+ function toTitleCase(str) {
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+} 
+
+
+/**
+  * Gets a youtube url for an artist
+  */
+  function getYoutubeApiUrl(artist) {
+    return YOUTUBE_BASE_URL + artist + YOUTUBE_SEARCH_SUFFIX + YOUTUBE_API_KEY;
+  }
+
+/**
+  * Helper function to get an embed tag for a youtube video by video id 
+  */
+function getYoutubeEmbedString(videoId, width, height) {
+  width = (width) ? width : 320;
+  height = (height) ?height : 240;
+  return '<iframe width="' + width + '" height="' + height + ' src="//www.youtube.com/embed/' + videoId + '" frameborder="0" allowfullscreen></iframe>';
+}
+
 
 
 
