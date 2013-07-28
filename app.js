@@ -17,7 +17,10 @@ var WIKI = {};
 var TWEET_COUNT = 100;
 
 // Twitter user ids
-var TWITTER_USERS_IDS = {
+var a = require('./twitter-handles');
+var TWITTER_USER_IDS = a.TWITTER_USER_IDS;
+
+var OTHER_TWITTER_USERS_IDS = {
  'muse': '14583400',
  'ed sheeran': '85452649',
  'coldplay': '18863815'
