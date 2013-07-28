@@ -119,7 +119,7 @@ io.sockets.on('connection', function (socket) {
 /**
  * Main (Home) route
  */
-app.get('/home', function(req, res) {
+app.get('/', function(req, res) {
   var templateVars = {
       //Add some template variables
       PAGE_TITLE: "Node (Express 3.0.1) & Socket.io Bootstrap"
@@ -127,8 +127,6 @@ app.get('/home', function(req, res) {
 
   //Render the index.ejs file with any template variables
   res.render('index', templateVars);
-  res.json
-  res.send
 });
 
 
@@ -136,13 +134,20 @@ app.get('/home', function(req, res) {
  * Search route
  *
  */
-app.get('/search', function(req, res) {
-  if (!req.query || !req.query.artist || req.query.artist == '') {
+app.get('/search/:artist', function(req, res) {
+  // if (!req.query || !req.query.artist || req.query.artist == '') {
+  //   sendError(res, 'No Artist given');
+  //   return;
+  // }
+  // var results;
+  // var artist = toTitleCase(req.query.artist);
+  if (!req.params || !req.params.artist || req.params.artist == '') {
     sendError(res, 'No Artist given');
     return;
   }
   var results;
-  var artist = toTitleCase(req.query.artist);
+  var artist = toTitleCase(req.params.artist);
+
 
   var hasCache = YOUTUBE[artist] && CONCERTS[artist] && WIKI[artist] && TWEETS[artist];
   if (hasCache) {

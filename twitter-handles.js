@@ -1,4 +1,5 @@
 exports.TWITTER_USER_IDS = {
+	"silversun pickups": "sspu",
 	"ed sheeran": "edsheeran",
 	"muse": "muse",
  	"justin bieber": "justinbieber",
