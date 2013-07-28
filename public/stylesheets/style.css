@@ -44,6 +44,9 @@ a {
 	padding: 1px 9px;
 	vertical-align: middle;
 	margin-right: 13px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 }
 
 .search-button {
@@ -51,4 +54,7 @@ a {
 	height: 43px;
 	font-size: 20px;
 	vertical-align: middle;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
 }
