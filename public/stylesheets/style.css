@@ -33,22 +33,22 @@ a {
 
 #searchbar-container {
 	display: block;
-	width: 535px;
+	width: 485px;
 	margin: 0 auto;
 }
 
 .search-input {
-	width: 430px;
-	height: 35px;
-	font-size: 24px;
-	padding: 0px 7px;
+	width: 375px;
+	height: 38px;
+	font-size: 29px;
+	padding: 1px 9px;
 	vertical-align: middle;
 	margin-right: 13px;
 }
 
 .search-button {
-	width: 70px;
-	height: 40px;
+	width: 75px;
+	height: 43px;
 	font-size: 20px;
 	vertical-align: middle;
 }
