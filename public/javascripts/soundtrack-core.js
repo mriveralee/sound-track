@@ -1,20 +1,56 @@
 $(document).ready(function() {
 
+var KEY = {
+	ENTER: 13
+};
+
 // Model
 
 var SoundTrackModel = Backbone.Model.extend({
 	defaults: {
-
+		artist: '',
+		youtube: [],
+		concerts: [],
+		tweets: {},
+		wiki: {}
 	},
 
+	urlRoot: '/search/',
 	initialize: function() {
-
+		// Do Nothing
 	},
 
-	updateArtist: function() {
-		this.artist = $('.search-input').val();
-		console.log("fetch dis jawn for " + this.artist);
-	}
+	updateArtist: function(artist) {
+		artist = artist.trim();
+		this.artist = artist;
+		this.id = artist;
+		this.refreshData();
+	},
+
+ refreshData: function() {
+      //Fetch tree model from server using the following method
+      /* 1) Generates a URL from host+urlRoot+'/'+id
+       *    Ex: Assume id = 123 
+      *       URL IS: http://localhost:8000/ + urlRoot + / + 123
+       */
+      this.fetch({
+        success: function(model, res, options) {
+          if (res) {
+           console.log(res); 
+           this.youtube = res.youtube;
+           this.concerts = res.concerts;
+           this.wiki = res.wiki,
+           this.tweets = res.twitter 
+          } 
+        },
+        error: function(model, res, options) {
+          console.log("Error getting Artist model");
+        }
+      });
+
+
+    }
+
 });
 
 // Views
@@ -32,7 +68,8 @@ var SearchBarView = Backbone.View.extend({
 	el: $('#searchbar-container'),
 
 	events: {
-		"click .search-button": "updateModel"
+		"click .search-button": "updateModel",
+		"keyup": 'handleKeypress'
 	},
 
 	initialize: function() {
@@ -44,7 +81,17 @@ var SearchBarView = Backbone.View.extend({
 	},
 
 	updateModel: function() {
-		this.model.updateArtist();
+		var artist = $('.search-input').val();
+		this.model.updateArtist(artist);
+	},
+
+	handleKeypress: function(e) {
+		var key = e.which;
+		switch(key) {
+			case KEY.ENTER:
+				this.updateModel();
+				break;
+		}
 	}
 
 });
