@@ -27,6 +27,22 @@ var SoundTrackModel = Backbone.Model.extend({
 		this.refreshData();
 	},
 
+	getVideos: function() {
+		return this.get('youtube');
+	},
+
+	getWikie: function() {
+		return this.get('wiki');
+	},
+
+	getConcerts: function() {
+		return this.get('concerts');
+	},
+
+	getTweets: function() {
+		return this.get('tweets');
+	},
+
  refreshData: function() {
       //Fetch tree model from server using the following method
       /* 1) Generates a URL from host+urlRoot+'/'+id
@@ -59,8 +75,8 @@ var SearchBarView = Backbone.View.extend({
 
 	template: function() {
 		var temp =
-			"<input class='search-input' type='text' placeholder='Search for an artist'>" +
-			"<button class='search-button' type='submit'>Track</button>"
+			'<input class="search-input" type="text" placeholder="Search for an artist">' +
+			'<button class="search-button" type="submit">Track</button>'
 			;
 		return temp;
 	},
@@ -68,8 +84,8 @@ var SearchBarView = Backbone.View.extend({
 	el: $('#searchbar-container'),
 
 	events: {
-		"click .search-button": "updateModel",
-		"keyup": "handleKeypress"
+		'click .search-button': 'updateModel',
+		'keyup': 'handleKeypress'
 	},
 
 	initialize: function() {
@@ -97,8 +113,57 @@ var SearchBarView = Backbone.View.extend({
 });
 
 
+var VideoResultsView = Backbone.View.extend({
+
+	template: function() {
+		var temp = '<div id="'+this.elName+'""></div>';
+		return temp;
+	},
+
+	parentEl: $('#main-content'),
+	elName: 'video-results',
+	el: null,
+	maxDisplayCount: 15,
+
+	events: {
+	},
+
+	initialize: function() {
+		$(this.parentEl).append(this.template());
+		this.el = $('#'+this.elName);
+		this.listenTo(this.model, 'change', this.render);
+	},
+
+	render: function() {
+		var videoItems = this.model.getVideos();
+		var videoEmbeds = "";
+		for (var i = 0; i < videoItems.length && i < this.maxDisplayCount; i++) {
+			var item = videoItems[i];
+			videoEmbeds += item.html + '<br>'; 
+		}
+		this.el.html(videoEmbeds);
+	},
+
+	updateModel: function() {
+		var artist = $('.search-input').val();
+		this.model.updateArtist(artist);
+	},
+
+	handleKeypress: function(e) {
+		var key = e.which;
+		switch(key) {
+			case KEY.ENTER:
+				this.updateModel();
+				break;
+		}
+	}
+
+});
+
+
 // Initialize the jawnskis
 var MainModel = new SoundTrackModel();
 var SearchBar = new SearchBarView({model: MainModel});
+var VideoResults = new  VideoResultsView({model: MainModel});
 
 }); // End $(document).ready

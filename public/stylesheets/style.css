@@ -1,7 +1,9 @@
 body {
   padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  /*
   background-image: url('http://images4.fanpop.com/image/photos/19700000/Chad-Kroeger-nickelback-19705418-1280-800.png');
+  */
   background-size: 100%;
   background-repeat: no-repeat;
 }
@@ -62,3 +64,13 @@ a {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 }
+
+#video-results {
+	display: block;
+	min-width: 485px;
+	width: 50%;
+	margin: 20px auto;
+	text-align: center
+}
+
+
