@@ -95,7 +95,7 @@ server.listen(CONFIG.server_port, function() {
 
 
 //################ Socket IO ######################//
-var io = require('socket.io').listen(server);
+var io = require('socket.io').listen(server, { log: false });
 //Turn off server-side heartbeat & debug messages from socket.io
 // io.set("log level", 0);   
 
